@@ -1,33 +1,42 @@
-import React from 'react'
+import React,{useEffect} from 'react'
 import { connect } from 'react-redux'
 import * as actionCreators from '../state/action-creators'
 
-function Quiz(props) {
+export function Quiz(props) {
+  console.log(props)
+  useEffect(()=>{
+    props.fetchQuiz()
+  },[])
+
+  const handleSubmit = (e)=>{
+    e.preventDefault()
+    props.postAnswer(props.quiz.quiz_id,props.selectedAnswer)
+  }
   return (
     <div id="wrapper">
       {
         // quiz already in state? Let's use that, otherwise render "Loading next quiz..."
-        true ? (
+        props.quiz? (
           <>
-            <h2>What is a closure?</h2>
+            <h2>{props.quiz.question}</h2>
 
             <div id="quizAnswers">
-              <div className="answer selected">
-                A function
-                <button>
-                  SELECTED
+              <div className={ props.selectedAnswer === props.quiz.answers[0].answer_id? "answer selected" : "answer"}>
+                {props.quiz.answers[0].text}
+                <button onClick={()=>props.selectAnswer(props.quiz.answers[0].answer_id)}>
+                { props.selectedAnswer === props.quiz.answers[0].answer_id? "SELECTED" : "SELECT"}
                 </button>
               </div>
 
-              <div className="answer">
-                An elephant
-                <button>
-                  Select
+              <div className={ props.selectedAnswer === props.quiz.answers[1].answer_id? "answer selected" : "answer"}>
+                {props.quiz.answers[1].text}
+                <button onClick={()=>props.selectAnswer(props.quiz.answers[1].answer_id)}>
+                { props.selectedAnswer === props.quiz.answers[1].answer_id? "SELECTED" : "SELECT"}
                 </button>
               </div>
             </div>
 
-            <button id="submitAnswerBtn">Submit answer</button>
+            <button id="submitAnswerBtn"  onClick={handleSubmit} disabled={!props.selectedAnswer}>Submit answer</button>
           </>
         ) : 'Loading next quiz...'
       }

@@ -6,6 +6,11 @@ RESET_FORM,
 SET_INFO_MESSAGE,
 SET_QUIZ_INTO_STATE,
 SET_SELECTED_ANSWER, } from "./action-types"
+import axios from "axios"
+
+const URL = 'http://localhost:9000/api/quiz/next'
+
+
 
 // ❗ You don't need to add extra action creators to achieve MVP
 export function moveClockwise() { 
@@ -39,21 +44,46 @@ export function resetForm() {
 // ❗ Async action creators
 export function fetchQuiz() {
   return function (dispatch) {
+    // dispatch(setMessage('Loading next quiz...'))
+    axios.get(URL)
+    .then(res=>{
+      dispatch(setQuiz(res.data))
+    })
+    .catch(err=>{
+      dispatch(setMessage(err.message))
+    })
     // First, dispatch an action to reset the quiz state (so the "Loading next quiz..." message can display)
     // On successful GET:
     // - Dispatch an action to send the obtained quiz to its state
   }
 }
-export function postAnswer() {
+export function postAnswer(quiz_id,answer_id) {
   return function (dispatch) {
+    axios.post('http://localhost:9000/api/quiz/answer',{quiz_id,answer_id})
+    .then(res=>{ console.log(res)
+      dispatch(selectAnswer(null))
+      dispatch(setMessage(res.data.message))
+      dispatch(fetchQuiz())
+    })
+    .catch(err=>{ 
+      dispatch(setMessage(err.message))
+    })
     // On successful POST:
     // - Dispatch an action to reset the selected answer state
     // - Dispatch an action to set the server message to state
     // - Dispatch the fetching of the next quiz
   }
 }
-export function postQuiz() {
+export function postQuiz(question_text,true_answer_text,false_answer_text) {
   return function (dispatch) {
+    axios.post('http://localhost:9000/api/quiz/new',{question_text,true_answer_text,false_answer_text})
+    .then(res=>{
+      dispatch(setMessage(`Congrats: "${question_text}" is a great question!`))
+      // dispatch(resetForm())
+    })
+    .catch(err=>{
+      dispatch(setMessage(err.data.message))
+    })
     // On successful POST:
     // - Dispatch the correct message to the the appropriate state
     // - Dispatch the resetting of the form
